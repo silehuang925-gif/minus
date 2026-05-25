@@ -1,0 +1,152 @@
+# ===== Codemagic CI/CD 配置 =====
+# 使用说明: https://docs.codemagic.io/yaml/yaml/
+#
+# 首次使用步骤:
+# 1. 把项目推送到 GitHub (git push origin main)
+# 2. 登录 https://codemagic.io 用 GitHub 注册
+# 3. 添加仓库 → 选择此项目
+# 4. Codemagic 自动读取 codemagic.yaml
+# 5. 点击 "Start new build" 选择 workflow
+
+workflows:
+
+  # ============ iOS IPA 构建 ============
+  # 需要: Apple Developer 账号 ($99/年)
+  # Codemagic 免费额度: 500分钟/月 macOS M2
+  build-ios:
+    name: 📱 iOS IPA
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      node: 20.11.0
+      xcode: 16.0
+      groups:
+        # 在 Codemagic → Team → Environment Variables 里创建这个 group
+        # 需要配置 APP_STORE_CONNECT_KEY 相关变量用于自动签名
+        - ios-credentials
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'release/*'
+          include: true
+    scripts:
+      - name: 安装依赖
+        script: npm ci
+      - name: 构建前端
+        script: npm run build
+      - name: 同步 Capacitor iOS
+        script: npx cap sync ios
+      - name: 安装 CocoaPods
+        script: cd ios/App && pod install --repo-update
+      - name: 设置版本号
+        script: |
+          cd ios/App
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0" App/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $PROJECT_BUILD_NUMBER" App/Info.plist
+      - name: 构建 Archive
+        script: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath /tmp/ios.xcarchive \
+            CODE_SIGN_STYLE=Auto \
+            archive
+      - name: 导出 IPA
+        script: |
+          xcodebuild \
+            -exportArchive \
+            -archivePath /tmp/ios.xcarchive \
+            -exportOptionsPlist ios/App/exportOptions.plist \
+            -exportPath /tmp/ios-output
+    artifacts:
+      - /tmp/ios-output/*.ipa
+    publishing:
+      email:
+        recipients:
+          - user@example.com   # ← 改成你的邮箱
+      codemagic:
+        release:
+          name: Minus iOS
+          type: ipa
+
+  # ============ Android APK 构建 (调试版，无需签名) ============
+  build-android-debug:
+    name: 🤖 Android Debug APK
+    max_build_duration: 20
+    instance_type: linux_x2
+    environment:
+      node: 20.11.0
+      java: 21
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: '*'
+          include: true
+    scripts:
+      - name: 安装依赖
+        script: npm ci
+      - name: 构建前端
+        script: npm run build
+      - name: 同步 Capacitor Android
+        script: npx cap sync android
+      - name: 构建 Debug APK
+        script: |
+          cd android
+          ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
+
+  # ============ Android AAB (发布版，需签名) ============
+  build-android-release:
+    name: 🤖 Android Release (AAB)
+    max_build_duration: 25
+    instance_type: linux_x2
+    environment:
+      node: 20.11.0
+      java: 21
+      groups:
+        # 在 Codemagic → Team → Environment Variables 创建此 group
+        # CM_KEYSTORE       → base64 encoded .keystore file
+        # CM_KEYSTORE_PASSWORD
+        # CM_KEY_ALIAS
+        # CM_KEY_PASSWORD
+        - android-keystore
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+    scripts:
+      - name: 安装依赖
+        script: npm ci
+      - name: 构建前端
+        script: npm run build
+      - name: 同步 Capacitor Android
+        script: npx cap sync android
+      - name: 设置签名密钥
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > /tmp/keystore.jks
+      - name: 构建 Release APK
+        script: |
+          cd android
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=/tmp/keystore.jks \
+            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
+      - name: 构建 AAB
+        script: |
+          cd android
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=/tmp/keystore.jks \
+            -Pandroid.injected.signing.store.password=$CM_KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$CM_KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$CM_KEY_PASSWORD
+    artifacts:
+      - android/app/build/outputs/apk/release/*.apk
+      - android/app/build/outputs/bundle/release/*.aab

@@ -1,0 +1,17 @@
+node_modules/
+dist/
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+ios/Pods/
+ios/App/build/
+*.keystore
+*.jks
+*.zip
+extracted/
+.claude/
+.env
+.env.local
+.DS_Store
+Thumbs.db

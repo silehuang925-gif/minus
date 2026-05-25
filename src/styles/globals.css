@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input,
+  textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  html {
+    font-family: 'PingFang SC', 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface-bg text-charcoal-900;
+    overscroll-behavior: none;
+  }
+}
+
+@layer components {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .phone-frame {
+    @apply max-w-[393px] mx-auto min-h-screen relative;
+    box-shadow: 0 0 0 2px #1a1a1a, 0 0 0 4px #333, 0 0 20px rgba(0,0,0,0.3);
+    border-radius: 40px;
+  }
+
+  @media (min-width: 640px) {
+    .phone-frame {
+      margin-top: 24px;
+      margin-bottom: 24px;
+      min-height: calc(100vh - 48px);
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .phone-frame {
+      max-width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+
+  .card {
+    @apply bg-surface-card rounded-card shadow-card p-4;
+    @apply dark:bg-charcoal-800 dark:shadow-none dark:border dark:border-charcoal-700;
+  }
+
+  .btn-primary {
+    @apply bg-mint-200 text-charcoal-900 font-medium text-body rounded-btn py-3 px-6
+           active:scale-[0.96] transition-transform duration-100;
+    @apply dark:bg-mint-400 dark:text-white;
+  }
+
+  .btn-secondary {
+    @apply bg-charcoal-100 text-charcoal-900 font-medium text-body rounded-btn py-3 px-6
+           active:scale-[0.96] transition-transform duration-100;
+    @apply dark:bg-charcoal-700 dark:text-charcoal-100;
+  }
+
+  .btn-danger {
+    @apply bg-alert-red text-white font-medium text-body rounded-btn py-3 px-6
+           active:scale-[0.96] transition-transform duration-100;
+  }
+
+  .input-underline {
+    @apply bg-transparent border-0 border-b-2 border-surface-dim text-charcoal-900 text-body
+           py-2 px-1 w-full outline-none transition-colors duration-200
+           focus:border-mint-200;
+    @apply dark:text-charcoal-100 dark:border-charcoal-600;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/40 z-40;
+  }
+
+  .modal-sheet {
+    @apply fixed bottom-0 left-0 right-0 bg-white rounded-t-modal shadow-modal z-50 safe-bottom;
+    max-width: 393px;
+    margin: 0 auto;
+    @apply dark:bg-charcoal-800;
+  }
+
+  @media (max-width: 639px) {
+    .modal-sheet {
+      max-width: 100%;
+    }
+  }
+
+  .chip {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full bg-charcoal-100 text-charcoal-600
+           text-label-sm active:scale-95 transition-transform;
+    @apply dark:bg-charcoal-700 dark:text-charcoal-300;
+  }
+
+  .chip-active {
+    @apply bg-mint-200 text-charcoal-700;
+    @apply dark:bg-mint-400 dark:text-charcoal-100;
+  }
+}
+
+@layer utilities {
+  .font-din {
+    font-family: 'DIN Alternate', 'Inter', sans-serif;
+    font-weight: 700;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Progress ring animation */
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.8s ease-out;
+}
+
+/* FAB rotation */
+.fab-rotate {
+  transform: rotate(45deg);
+}
+
+/* Bottom sheet slide */
+.sheet-enter {
+  animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.sheet-exit {
+  animation: slideDown 0.25s ease-in forwards;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+/* FAB children stagger */
+.fab-child {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.fab-child:nth-child(1) { animation: fabIn 0.3s ease-out 0s forwards; }
+.fab-child:nth-child(2) { animation: fabIn 0.3s ease-out 0.06s forwards; }
+.fab-child:nth-child(3) { animation: fabIn 0.3s ease-out 0.12s forwards; }
+
+@keyframes fabIn {
+  from {
+    opacity: 0;
+    transform: scale(0) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

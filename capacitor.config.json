@@ -1,0 +1,17 @@
+{
+  "appId": "com.minus.app",
+  "appName": "Minus",
+  "webDir": "dist",
+  "androidScheme": "https",
+  "plugins": {
+    "StatusBar": {
+      "style": "dark",
+      "backgroundColor": "#F5F5F7"
+    },
+    "SplashScreen": {
+      "launchShowDuration": 500,
+      "backgroundColor": "#F5F5F7",
+      "showSpinner": false
+    }
+  }
+}
