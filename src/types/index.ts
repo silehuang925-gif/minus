@@ -1,10 +1,12 @@
 export interface UserProfile {
   name: string;
+  avatar?: string;       // base64 image
   height: number;        // cm
   currentWeight: number; // kg
   age: number;
   gender: 'male' | 'female';
   activityLevel: ActivityLevel;
+  initialWeight: number;  // kg, 初始体重
   targetWeight: number;  // kg
   bmr: number;
   bmi: number;
@@ -47,7 +49,29 @@ export interface ExerciseRecord {
   timestamp: number;
 }
 
-export type ExerciseType = '跑步' | '骑行' | '游泳' | '力量训练' | '瑜伽' | '其他';
+export type ExerciseType = '跑步' | '骑行' | '游泳' | '力量训练' | '瑜伽' | '篮球' | '足球' | '羽毛球' | '乒乓球' | '网球' | '排球' | '徒步' | '爬楼梯' | '跳绳' | '跳舞' | '椭圆机' | '划船机' | '其他';
+
+export interface Recipe {
+  id: string;
+  name: string;
+  calories: number;       // 一人份热量 (kcal)
+  carbs: number;          // 碳水 g
+  protein: number;        // 蛋白 g
+  fat: number;            // 脂肪 g
+  category: RecipeCategory; // 主食/荤菜/素菜/汤/小吃
+  cuisine: string;        // 菜系
+}
+
+export type RecipeCategory = '主食' | '荤菜' | '素菜' | '汤品' | '小吃';
+
+export interface MealPlan {
+  items: Recipe[];
+  totalCalories: number;
+  totalCarbs: number;
+  totalProtein: number;
+  totalFat: number;
+  matchScore: number;     // 与目标的匹配度 %
+}
 
 export interface CustomFood {
   id: string;

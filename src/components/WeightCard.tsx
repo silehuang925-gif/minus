@@ -1,8 +1,12 @@
 import { useApp } from '@/context/AppContext';
 
-export default function WeightCard() {
+interface Props {
+  onClick?: () => void;
+}
+
+export default function WeightCard({ onClick }: Props) {
   const { state } = useApp();
-  const { weightRecords, profile } = state;
+  const { weightRecords } = state;
 
   const latest = weightRecords.length > 0 ? weightRecords[0] : null;
   const previous = weightRecords.length > 1 ? weightRecords[1] : null;
@@ -11,7 +15,10 @@ export default function WeightCard() {
   const hasToday = latest ? latest.date === new Date().toISOString().split('T')[0] : false;
 
   return (
-    <div className="card">
+    <button
+      onClick={onClick}
+      className="card w-full text-left active:scale-[0.98] transition-transform"
+    >
       <p className="text-label text-charcoal-400 uppercase tracking-wider">今日体重</p>
       <div className="flex items-end gap-3 mt-2">
         {latest ? (
@@ -40,6 +47,6 @@ export default function WeightCard() {
       {!hasToday && latest && (
         <p className="text-label-sm text-alert-orange mt-1">未更新</p>
       )}
-    </div>
+    </button>
   );
 }

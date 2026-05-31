@@ -71,13 +71,15 @@ export default function ProgressRing({ summary, hasData }: Props) {
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {remaining >= 0 ? (
             <>
+              <span className="text-body-sm text-charcoal-400">还能吃</span>
               <span className="text-display font-din text-charcoal-900 dark:text-white">{remaining}</span>
-              <span className="text-label-sm text-charcoal-400 mt-1">还能吃 千卡</span>
+              <span className="text-body-sm text-charcoal-400">千卡</span>
             </>
           ) : (
             <>
+              <span className="text-body-sm text-alert-red">超出</span>
               <span className="text-display font-din text-alert-red">{Math.abs(remaining)}</span>
-              <span className="text-label-sm text-alert-red mt-1">超出 千卡</span>
+              <span className="text-body-sm text-alert-red">千卡</span>
             </>
           )}
         </div>

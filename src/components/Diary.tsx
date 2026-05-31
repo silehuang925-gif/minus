@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { getTodayStr } from '@/utils/data';
 import type { FoodRecord, MealType } from '@/types';
@@ -10,11 +10,32 @@ export default function Diary() {
   const { state, dispatch } = useApp();
   const [date, setDate] = useState(getTodayStr());
   const [detailRecord, setDetailRecord] = useState<FoodRecord | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (state.diaryDate) {
+      setDate(state.diaryDate);
+      dispatch({ type: 'SET_DIARY_DATE', payload: null });
+    }
+  }, [state.diaryDate]);
 
   const dateFoods = useMemo(
     () => state.foodRecords.filter((r) => r.date === date),
     [state.foodRecords, date]
   );
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelected(next);
+  };
+
+  const batchDelete = () => {
+    selected.forEach((id) => dispatch({ type: 'DELETE_FOOD_RECORD', payload: id }));
+    setSelected(new Set());
+    setSelectMode(false);
+  };
 
   const totalCalories = dateFoods.reduce((s, r) => s + r.calories, 0);
 
@@ -47,6 +68,14 @@ export default function Diary() {
           </svg>
         </button>
         <h1 className="text-headline-sm text-charcoal-900 dark:text-white ml-1 flex-1">饮食日记</h1>
+        {dateFoods.length > 0 && (
+          <button
+            onClick={() => { setSelectMode(!selectMode); setSelected(new Set()); }}
+            className="text-label-sm text-charcoal-400 px-3 active:text-charcoal-600"
+          >
+            {selectMode ? '取消' : '多选'}
+          </button>
+        )}
       </div>
 
       {/* Date Navigation */}
@@ -75,16 +104,28 @@ export default function Diary() {
       <div className="flex-1 px-5 space-y-4 overflow-y-auto pb-8">
         {dateFoods.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-full bg-charcoal-100 flex items-center justify-center mx-auto mb-4">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C7C7CC" strokeWidth="2" strokeLinecap="round">
-                <path d="M18 8a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V8Z" />
-                <line x1="12" y1="12" x2="12" y2="16" /><line x1="10" y1="14" x2="14" y2="14" />
+            <button
+              onClick={() => dispatch({ type: 'SET_PAGE', payload: 'food-search' })}
+              className="w-12 h-12 rounded-lg bg-mint-200 flex items-center justify-center mx-auto mb-4 active:scale-90 transition-transform"
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-            </div>
-            <p className="text-body text-charcoal-500">这天没有饮食记录</p>
+            </button>
+            <p className="text-body text-charcoal-400">这天没有饮食记录</p>
           </div>
         ) : (
-          mealTypes.map((meal) => {
+          <>
+            {selectMode && selected.size > 0 && (
+              <button
+                onClick={batchDelete}
+                className="w-full py-2 bg-alert-red/10 text-alert-red text-label-sm font-medium rounded-btn active:scale-[0.97]"
+              >
+                删除选中 ({selected.size})
+              </button>
+            )}
+            {mealTypes.map((meal) => {
             const items = byMeal(meal);
             if (items.length === 0) return null;
             return (
@@ -97,25 +138,39 @@ export default function Diary() {
                 </div>
                 <div className="space-y-1.5">
                   {items.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setDetailRecord(item)}
-                      className="w-full card flex items-center justify-between py-3 active:scale-[0.98]"
-                    >
-                      <div className="text-left">
-                        <p className="text-body text-charcoal-800">{item.foodName}</p>
-                        <p className="text-label-sm text-charcoal-400">{item.time} · {item.amount}{item.unit}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-body font-din text-charcoal-700">{item.calories}</p>
-                        <p className="text-label-sm text-charcoal-400">kcal</p>
-                      </div>
-                    </button>
+                    <div key={item.id} className="card flex items-center justify-between py-3 active:scale-[0.98]">
+                      {selectMode && (
+                        <button
+                          onClick={() => toggleSelect(item.id)}
+                          className={`w-5 h-5 rounded border-2 mr-3 flex-shrink-0 flex items-center justify-center ${
+                            selected.has(item.id) ? 'bg-mint-200 border-mint-200' : 'border-charcoal-300'
+                          }`}
+                        >
+                          {selected.has(item.id) && (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 13l4 4L19 7"/></svg>
+                          )}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => selectMode ? toggleSelect(item.id) : setDetailRecord(item)}
+                        className="flex-1 flex items-center justify-between"
+                      >
+                        <div className="text-left">
+                          <p className="text-body text-charcoal-800 dark:text-white">{item.foodName}</p>
+                          <p className="text-label-sm text-charcoal-400 dark:text-charcoal-300">{item.time} · {item.amount}{item.unit}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-body font-din text-charcoal-700 dark:text-mint-200">{item.calories}</p>
+                          <p className="text-label-sm text-charcoal-400 dark:text-charcoal-300">kcal</p>
+                        </div>
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
             );
-          })
+          })}
+          </>
         )}
 
         {/* Total */}

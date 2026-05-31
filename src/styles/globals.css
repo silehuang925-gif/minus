@@ -62,7 +62,7 @@
 
   .card {
     @apply bg-surface-card rounded-card shadow-card p-4;
-    @apply dark:bg-charcoal-800 dark:shadow-none dark:border dark:border-charcoal-700;
+    @apply dark:bg-[#1e1e1e] dark:shadow-none dark:border dark:border-[#333];
   }
 
   .btn-primary {
@@ -97,7 +97,19 @@
     @apply fixed bottom-0 left-0 right-0 bg-white rounded-t-modal shadow-modal z-50 safe-bottom;
     max-width: 393px;
     margin: 0 auto;
-    @apply dark:bg-charcoal-800;
+    @apply dark:bg-charcoal-800 dark:text-charcoal-100;
+  }
+  .modal-sheet h2,
+  .modal-sheet h3 {
+    @apply dark:text-white;
+  }
+  .modal-sheet p,
+  .modal-sheet span,
+  .modal-sheet label {
+    @apply dark:text-charcoal-200;
+  }
+  .modal-sheet input {
+    @apply dark:text-white dark:border-charcoal-500;
   }
 
   @media (max-width: 639px) {
@@ -172,6 +184,7 @@
 .fab-child:nth-child(1) { animation: fabIn 0.3s ease-out 0s forwards; }
 .fab-child:nth-child(2) { animation: fabIn 0.3s ease-out 0.06s forwards; }
 .fab-child:nth-child(3) { animation: fabIn 0.3s ease-out 0.12s forwards; }
+.fab-child:nth-child(4) { animation: fabIn 0.3s ease-out 0.18s forwards; }
 
 @keyframes fabIn {
   from {

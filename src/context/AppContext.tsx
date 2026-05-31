@@ -31,6 +31,8 @@ interface AppState {
   customFoods: CustomFood[];
   dailySummary: DailySummary;
   currentPage: PageRoute;
+  pageStack: PageRoute[];
+  diaryDate: string | null;
   darkMode: boolean;
 }
 
@@ -50,6 +52,8 @@ type Action =
   | { type: 'SET_CUSTOM_FOODS'; payload: CustomFood[] }
   | { type: 'ADD_CUSTOM_FOOD'; payload: CustomFood }
   | { type: 'SET_PAGE'; payload: PageRoute }
+  | { type: 'GO_BACK' }
+  | { type: 'SET_DIARY_DATE'; payload: string | null }
   | { type: 'TOGGLE_DARK_MODE' }
   | { type: 'RECALC_SUMMARY' };
 
@@ -70,7 +74,7 @@ function reducer(state: AppState, action: Action): AppState {
         profile.bmr = calcBMR(profile.currentWeight, profile.height, profile.age, profile.gender);
         profile.bmi = calcBMI(profile.currentWeight, profile.height);
       }
-      const dailySummary = getDailySummary();
+      const dailySummary = getDailySummary(state.foodRecords, state.exerciseRecords);
       return { ...state, profile, dailySummary };
     }
 
@@ -78,7 +82,11 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, weightRecords: action.payload };
 
     case 'ADD_WEIGHT_RECORD':
-      return { ...state, weightRecords: [action.payload, ...state.weightRecords] };
+      return {
+        ...state,
+        weightRecords: [action.payload, ...state.weightRecords],
+        dailySummary: getDailySummary(state.foodRecords, state.exerciseRecords),
+      };
 
     case 'DELETE_WEIGHT_RECORD':
       return {
@@ -89,33 +97,35 @@ function reducer(state: AppState, action: Action): AppState {
     case 'SET_FOOD_RECORDS':
       return { ...state, foodRecords: action.payload };
 
-    case 'ADD_FOOD_RECORD':
-      return { ...state, foodRecords: [action.payload, ...state.foodRecords] };
+    case 'ADD_FOOD_RECORD': {
+      const foods = [action.payload, ...state.foodRecords];
+      return { ...state, foodRecords: foods, dailySummary: getDailySummary(foods, state.exerciseRecords) };
+    }
 
     case 'UPDATE_FOOD_RECORD': {
       const records = state.foodRecords.map((r) =>
         r.id === action.payload.id ? { ...r, ...action.payload.updates } : r
       );
-      return { ...state, foodRecords: records };
+      return { ...state, foodRecords: records, dailySummary: getDailySummary(records, state.exerciseRecords) };
     }
 
-    case 'DELETE_FOOD_RECORD':
-      return {
-        ...state,
-        foodRecords: state.foodRecords.filter((r) => r.id !== action.payload),
-      };
+    case 'DELETE_FOOD_RECORD': {
+      const foods = state.foodRecords.filter((r) => r.id !== action.payload);
+      return { ...state, foodRecords: foods, dailySummary: getDailySummary(foods, state.exerciseRecords) };
+    }
 
     case 'SET_EXERCISE_RECORDS':
       return { ...state, exerciseRecords: action.payload };
 
-    case 'ADD_EXERCISE_RECORD':
-      return { ...state, exerciseRecords: [action.payload, ...state.exerciseRecords] };
+    case 'ADD_EXERCISE_RECORD': {
+      const exercises = [action.payload, ...state.exerciseRecords];
+      return { ...state, exerciseRecords: exercises, dailySummary: getDailySummary(state.foodRecords, exercises) };
+    }
 
-    case 'DELETE_EXERCISE_RECORD':
-      return {
-        ...state,
-        exerciseRecords: state.exerciseRecords.filter((r) => r.id !== action.payload),
-      };
+    case 'DELETE_EXERCISE_RECORD': {
+      const exercises = state.exerciseRecords.filter((r) => r.id !== action.payload);
+      return { ...state, exerciseRecords: exercises, dailySummary: getDailySummary(state.foodRecords, exercises) };
+    }
 
     case 'SET_CUSTOM_FOODS':
       return { ...state, customFoods: action.payload };
@@ -123,14 +133,29 @@ function reducer(state: AppState, action: Action): AppState {
     case 'ADD_CUSTOM_FOOD':
       return { ...state, customFoods: [action.payload, ...state.customFoods] };
 
-    case 'SET_PAGE':
-      return { ...state, currentPage: action.payload };
+    case 'SET_PAGE': {
+      const stack = [...state.pageStack, state.currentPage];
+      return { ...state, currentPage: action.payload, pageStack: stack };
+    }
+
+    case 'GO_BACK': {
+      if (state.pageStack.length === 0) return state;
+      const prev = state.pageStack[state.pageStack.length - 1];
+      return {
+        ...state,
+        currentPage: prev,
+        pageStack: state.pageStack.slice(0, -1),
+      };
+    }
+
+    case 'SET_DIARY_DATE':
+      return { ...state, diaryDate: action.payload };
 
     case 'TOGGLE_DARK_MODE':
       return { ...state, darkMode: !state.darkMode };
 
     case 'RECALC_SUMMARY': {
-      const dailySummary = getDailySummary();
+      const dailySummary = getDailySummary(state.foodRecords, state.exerciseRecords);
       return { ...state, dailySummary };
     }
 
@@ -163,7 +188,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       customFoods: loadCustomFoods(),
       dailySummary: getDailySummary(),
       currentPage: 'dashboard' as PageRoute,
-      darkMode: false,
+      pageStack: [] as PageRoute[],
+      diaryDate: null,
+      darkMode: localStorage.getItem('minus_darkMode') === 'true',
     };
   });
 
@@ -174,9 +201,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { saveExerciseRecords(state.exerciseRecords); }, [state.exerciseRecords]);
   useEffect(() => { saveCustomFoods(state.customFoods); }, [state.customFoods]);
 
-  // Dark mode class toggle
+  // Dark mode class toggle + persist
   useEffect(() => {
     document.documentElement.classList.toggle('dark', state.darkMode);
+    localStorage.setItem('minus_darkMode', String(state.darkMode));
   }, [state.darkMode]);
 
   return (

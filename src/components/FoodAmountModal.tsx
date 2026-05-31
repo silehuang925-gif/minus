@@ -93,7 +93,7 @@ export default function FoodAmountModal({ food, onClose, editRecord }: Props) {
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setAmount(Math.max(10, amount - 10))}
+                onClick={() => setAmount(Math.max(50, amount - 50))}
                 className="w-10 h-10 rounded-full bg-charcoal-100 flex items-center justify-center text-charcoal-600 text-xl active:scale-90"
               >
                 -
@@ -104,10 +104,10 @@ export default function FoodAmountModal({ food, onClose, editRecord }: Props) {
                 value={amount}
                 onChange={(e) => setAmount(Math.max(0, parseInt(e.target.value) || 0))}
                 className="w-20 text-center text-headline font-din text-charcoal-900 bg-transparent border-b-2 border-mint-200 outline-none"
-                step={10}
+                step={50}
               />
               <button
-                onClick={() => setAmount(amount + 10)}
+                onClick={() => setAmount(amount + 50)}
                 className="w-10 h-10 rounded-full bg-charcoal-100 flex items-center justify-center text-charcoal-600 text-xl active:scale-90"
               >
                 +

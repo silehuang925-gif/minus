@@ -55,7 +55,7 @@ export default function FoodSearch() {
   }, [state.foodRecords, allFoods]);
 
   return (
-    <div className="flex flex-col min-h-screen safe-top bg-surface-bg">
+    <div className="flex flex-col min-h-screen safe-top bg-surface-bg dark:bg-[#121212]">
       {/* Header + Search */}
       <div className="bg-white dark:bg-charcoal-800 px-5 pt-3 pb-3 shadow-sm dark:shadow-none">
         <div className="flex items-center gap-3">
@@ -79,7 +79,7 @@ export default function FoodSearch() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="搜一下，比如鸡胸肉"
-              className="w-full pl-10 pr-4 py-2.5 bg-charcoal-50 rounded-btn text-body text-charcoal-900 outline-none focus:bg-charcoal-100 transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 bg-charcoal-50 dark:bg-charcoal-700 rounded-btn text-body text-charcoal-900 dark:text-white outline-none focus:bg-charcoal-100 dark:focus:bg-charcoal-600 transition-colors"
               autoFocus
             />
           </div>
@@ -90,17 +90,17 @@ export default function FoodSearch() {
       <div className="flex-1 px-5 pt-4 pb-8 overflow-y-auto">
         {query.trim() && results.length > 0 && (
           <div>
-            <p className="text-label text-charcoal-400 mb-2">搜索结果</p>
+            <p className="text-label text-charcoal-400 dark:text-charcoal-300 mb-2">搜索结果</p>
             <div className="space-y-1">
               {results.map((food) => (
                 <button
                   key={food.name + (food.id || '')}
                   onClick={() => setSelectedFood(food)}
-                  className="w-full flex items-center justify-between p-3 bg-white dark:bg-charcoal-800 rounded-card active:scale-[0.98] transition-transform"
+                  className="w-full flex items-center justify-between p-3 bg-white dark:bg-charcoal-700 rounded-card active:scale-[0.98] transition-transform"
                 >
                   <div className="text-left">
-                    <p className="text-body text-charcoal-800">{food.name}</p>
-                    <p className="text-label-sm text-charcoal-400">{food.caloriesPer100g} kcal/100g · {food.category}</p>
+                    <p className="text-body text-charcoal-800 dark:text-white">{food.name}</p>
+                    <p className="text-label-sm text-charcoal-400 dark:text-charcoal-300">{food.caloriesPer100g} kcal/100g · {food.category}</p>
                   </div>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C7C7CC" strokeWidth="2" strokeLinecap="round">
                     <path d="M9 18l6-6-6-6" />
@@ -113,7 +113,7 @@ export default function FoodSearch() {
 
         {query.trim() && results.length === 0 && (
           <div className="text-center py-10">
-            <p className="text-body text-charcoal-500 mb-2">未找到 "{query}"</p>
+            <p className="text-body text-charcoal-500 dark:text-charcoal-300 mb-2">未找到 "{query}"</p>
             <button
               onClick={() => setShowCustomFood(true)}
               className="text-body text-mint-500 font-medium"
@@ -127,7 +127,7 @@ export default function FoodSearch() {
           <>
             {frequentFoods.length > 0 && (
               <div className="mb-6">
-                <p className="text-label text-charcoal-400 mb-3">常吃食物</p>
+                <p className="text-label text-charcoal-400 dark:text-charcoal-300 mb-3">常吃食物</p>
                 <div className="grid grid-cols-3 gap-2">
                   {frequentFoods.map((food) => (
                     <button
@@ -143,10 +143,10 @@ export default function FoodSearch() {
             )}
 
             <div>
-              <p className="text-label text-charcoal-400 mb-3">食物分类</p>
+              <p className="text-label text-charcoal-400 dark:text-charcoal-300 mb-3">食物分类</p>
               {groupByCategory(allFoods).map(([cat, foods]) => (
                 <div key={cat} className="mb-4">
-                  <p className="text-label-sm text-charcoal-500 mb-2">{cat}</p>
+                  <p className="text-label-sm text-charcoal-500 dark:text-charcoal-300 mb-2">{cat}</p>
                   <div className="flex flex-wrap gap-2">
                     {foods.slice(0, 8).map((food) => (
                       <button

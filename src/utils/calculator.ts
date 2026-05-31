@@ -19,26 +19,51 @@ export function calcBMI(weight: number, height: number): number {
   return Math.round((weight / (h * h)) * 10) / 10;
 }
 
-// ====== Exercise Calorie Estimation ======
+// ====== Exercise Calorie Estimation (MET-based) ======
 export function calcExerciseCalories(
   type: ExerciseType,
   weight: number,
   duration: number, // minutes
   extraValue?: number // km for running
 ): number {
+  const h = duration / 60;
   switch (type) {
     case '跑步':
       return Math.round(weight * (extraValue || duration / 10) * 1.036);
     case '骑行':
-      return Math.round(weight * (duration / 60) * 7.0);
+      return Math.round(weight * h * 7.0);
     case '游泳':
       return Math.round(weight * duration * 0.106);
     case '力量训练':
-      return Math.round(weight * duration * 0.08);
+      return Math.round(weight * h * 6.0);
     case '瑜伽':
-      return Math.round(weight * duration * 0.053);
+      return Math.round(weight * h * 3.3);
+    case '篮球':
+      return Math.round(weight * h * 6.5);
+    case '足球':
+      return Math.round(weight * h * 7.0);
+    case '羽毛球':
+      return Math.round(weight * h * 5.5);
+    case '乒乓球':
+      return Math.round(weight * h * 4.0);
+    case '网球':
+      return Math.round(weight * h * 7.3);
+    case '排球':
+      return Math.round(weight * h * 4.0);
+    case '徒步':
+      return Math.round(weight * h * 6.0);
+    case '爬楼梯':
+      return Math.round(weight * h * 8.0);
+    case '跳绳':
+      return Math.round(weight * h * 10.0);
+    case '跳舞':
+      return Math.round(weight * h * 5.0);
+    case '椭圆机':
+      return Math.round(weight * h * 5.0);
+    case '划船机':
+      return Math.round(weight * h * 7.0);
     case '其他':
-      return 0; // manual input
+      return 0;
     default:
       return 0;
   }
@@ -53,10 +78,18 @@ export function calcFoodCalories(
 }
 
 // ====== Daily Summary ======
-export function getDailySummary(): DailySummary {
+export function getDailySummary(
+  foodRecords?: FoodRecord[],
+  exerciseRecords?: ExerciseRecord[],
+): DailySummary {
   const profile = loadProfile();
-  const todayFoods = getTodayFoodRecords();
-  const todayExercises = getTodayExerciseRecords();
+  const today = getTodayStr();
+  const todayFoods = foodRecords
+    ? foodRecords.filter((r) => r.date === today)
+    : getTodayFoodRecords();
+  const todayExercises = exerciseRecords
+    ? exerciseRecords.filter((r) => r.date === today)
+    : getTodayExerciseRecords();
 
   const bmr = profile.bmr || calcBMR(profile.currentWeight, profile.height, profile.age, profile.gender);
   const exerciseCalories = todayExercises.reduce((sum, e) => sum + e.calories, 0);

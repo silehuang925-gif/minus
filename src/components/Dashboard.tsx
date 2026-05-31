@@ -6,12 +6,15 @@ import ProgressRing from '@/components/ProgressRing';
 import WeightCard from '@/components/WeightCard';
 import IntakeSummary from '@/components/IntakeSummary';
 import MealPreview from '@/components/MealPreview';
+import StreakCard from '@/components/StreakCard';
+import CalendarWidget from '@/components/CalendarWidget';
 import FabMenu from '@/components/FabMenu';
 import WeightModal from '@/components/WeightModal';
 import ExerciseModal from '@/components/ExerciseModal';
 import FoodDetailModal from '@/components/FoodDetailModal';
+import RecipeRecommend from '@/components/RecipeRecommend';
 
-type ModalType = 'weight' | 'exercise' | null;
+type ModalType = 'weight' | 'exercise' | 'recipe' | null;
 
 export default function Dashboard() {
   const { state, dispatch } = useApp();
@@ -37,15 +40,15 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col min-h-screen safe-top safe-bottom">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-2">
-        <div>
-          <h1 className="text-headline text-charcoal-900 dark:text-white">Minus</h1>
-          <p className="text-label-sm text-charcoal-400">{dateLabel}</p>
+      {/* Header - centered */}
+      <div className="relative flex items-center justify-center px-5 pt-4 pb-2">
+        <div className="text-center">
+          <h1 className="text-headline text-mint-500 dark:text-mint-200">Minus</h1>
+          <p className="text-body-sm text-charcoal-400 mt-0.5">{dateLabel}</p>
         </div>
         <button
           onClick={() => dispatch({ type: 'SET_PAGE', payload: 'settings' })}
-          className="w-10 h-10 flex items-center justify-center rounded-full active:scale-90 transition-transform"
+          className="absolute right-5 w-10 h-10 flex items-center justify-center rounded-full active:scale-90 transition-transform"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="12" r="3" />
@@ -57,12 +60,14 @@ export default function Dashboard() {
       {/* Content */}
       <div className="flex-1 px-5 space-y-6 pb-24">
         <ProgressRing summary={summary} hasData={hasData} />
-        <WeightCard />
+        <WeightCard onClick={() => setModal('weight')} />
         {hasIntake && <IntakeSummary summary={summary} />}
         <MealPreview
           onItemClick={setDetailRecord}
           onViewDiary={() => dispatch({ type: 'SET_PAGE', payload: 'diary' })}
         />
+        <StreakCard />
+        <CalendarWidget />
       </div>
 
       {/* FAB */}
@@ -70,11 +75,13 @@ export default function Dashboard() {
         onFood={() => dispatch({ type: 'SET_PAGE', payload: 'food-search' })}
         onWeight={() => setModal('weight')}
         onExercise={() => setModal('exercise')}
+        onRecipe={() => setModal('recipe')}
       />
 
-      {/* Weight / Exercise Modals */}
+      {/* Modals */}
       {modal === 'weight' && <WeightModal onClose={closeModal} />}
       {modal === 'exercise' && <ExerciseModal onClose={closeModal} />}
+      {modal === 'recipe' && <RecipeRecommend onClose={closeModal} />}
 
       {/* Food Detail Modal */}
       {detailRecord && (

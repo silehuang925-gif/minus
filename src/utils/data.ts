@@ -37,6 +37,7 @@ export function getDefaultProfile(): UserProfile {
     age: 28,
     gender: 'female',
     activityLevel: '久坐办公',
+    initialWeight: 60,
     targetWeight: 55,
     bmr: 0,
     bmi: 0,

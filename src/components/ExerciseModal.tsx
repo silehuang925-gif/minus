@@ -10,6 +10,18 @@ const exerciseTypes: { type: ExerciseType; label: string; icon: string }[] = [
   { type: '游泳', label: '游泳', icon: '🏊' },
   { type: '力量训练', label: '力量', icon: '🏋️' },
   { type: '瑜伽', label: '瑜伽', icon: '🧘' },
+  { type: '篮球', label: '篮球', icon: '🏀' },
+  { type: '足球', label: '足球', icon: '⚽' },
+  { type: '羽毛球', label: '羽毛球', icon: '🏸' },
+  { type: '乒乓球', label: '乒乓球', icon: '🏓' },
+  { type: '网球', label: '网球', icon: '🎾' },
+  { type: '排球', label: '排球', icon: '🏐' },
+  { type: '徒步', label: '徒步', icon: '🥾' },
+  { type: '爬楼梯', label: '爬楼梯', icon: '🪜' },
+  { type: '跳绳', label: '跳绳', icon: '🪢' },
+  { type: '跳舞', label: '跳舞', icon: '💃' },
+  { type: '椭圆机', label: '椭圆机', icon: '🔄' },
+  { type: '划船机', label: '划船机', icon: '🚣' },
   { type: '其他', label: '其他', icon: '💪' },
 ];
 
@@ -71,18 +83,27 @@ export default function ExerciseModal({ onClose }: { onClose: () => void }) {
           {/* Duration */}
           {!isManual && (
             <div className="mt-5">
-              <p className="text-label text-charcoal-400 mb-2">时长（分钟）</p>
+              <p className="text-label text-charcoal-400 dark:text-charcoal-300 mb-2">时长（分钟）</p>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setDuration(Math.max(1, duration - 5))}
-                  className="w-10 h-10 rounded-full bg-charcoal-100 flex items-center justify-center text-charcoal-600 text-xl active:scale-90"
+                  className="w-10 h-10 rounded-full bg-charcoal-100 dark:bg-charcoal-700 flex items-center justify-center text-charcoal-600 dark:text-charcoal-300 text-xl active:scale-90"
                 >
                   -
                 </button>
-                <span className="text-headline font-din text-charcoal-900 flex-1 text-center">{duration}</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={duration}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value) || 1;
+                    setDuration(Math.max(1, Math.min(480, v)));
+                  }}
+                  className="text-headline font-din text-charcoal-900 dark:text-white bg-transparent flex-1 text-center border-b-2 border-mint-200 outline-none"
+                />
                 <button
-                  onClick={() => setDuration(duration + 5)}
-                  className="w-10 h-10 rounded-full bg-charcoal-100 flex items-center justify-center text-charcoal-600 text-xl active:scale-90"
+                  onClick={() => setDuration(Math.min(480, duration + 5))}
+                  className="w-10 h-10 rounded-full bg-charcoal-100 dark:bg-charcoal-700 flex items-center justify-center text-charcoal-600 dark:text-charcoal-300 text-xl active:scale-90"
                 >
                   +
                 </button>
@@ -122,10 +143,10 @@ export default function ExerciseModal({ onClose }: { onClose: () => void }) {
           )}
 
           {/* Estimated Calories */}
-          <div className="mt-5 p-4 bg-mint-50 rounded-card text-center">
-            <p className="text-label text-charcoal-400">预估消耗</p>
-            <p className="text-headline font-din text-mint-600 mt-1">{estimatedCalories}</p>
-            <p className="text-label-sm text-charcoal-400">千卡</p>
+          <div className="mt-5 p-4 bg-mint-50 dark:bg-charcoal-700 rounded-card text-center">
+            <p className="text-label text-charcoal-400 dark:text-charcoal-300">预估消耗</p>
+            <p className="text-headline font-din text-mint-600 dark:text-mint-300 mt-1">{estimatedCalories}</p>
+            <p className="text-label-sm text-charcoal-400 dark:text-charcoal-300">千卡</p>
           </div>
 
           <button

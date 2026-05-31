@@ -31,6 +31,7 @@ export default function WeightModal({ onClose }: Props) {
       timestamp: getTodayStamp(),
     };
     dispatch({ type: 'ADD_WEIGHT_RECORD', payload: record });
+    dispatch({ type: 'UPDATE_PROFILE', payload: { currentWeight: record.weight } });
     onClose();
   };
 
